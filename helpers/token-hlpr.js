@@ -217,7 +217,8 @@ var TokenHelper = function (ethsf) {
                         {
                             $set: {
                                 eSimStatus: eSimStatus.data.esim.status,
-                                dataUsageRemainingInBytes: result.data.dataUsageRemainingInBytes
+                                dataUsageRemainingInBytes: result.data.dataUsageRemainingInBytes,
+                                updatedOn:new Date()
                             }
                         });
                     callback(null, response);
