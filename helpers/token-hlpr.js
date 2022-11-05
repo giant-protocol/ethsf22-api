@@ -109,7 +109,7 @@ var TokenHelper = function (ethsf) {
                     activationCode: purchase.data.profile.activationCode,
                     dataUsageRemainingInBytes: args.dataLimit * process.env.CONVERSION_FACTOR,
                     walletAddress: args.from.toLowerCase(),
-                    metadata: args.metadata
+                    external_data: args.metadata
                 });
                 this.updatePayment(args);
                 callback(null, true);

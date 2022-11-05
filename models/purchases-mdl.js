@@ -6,7 +6,7 @@
 var purchasesSchema = new mongoose.Schema({
     customerId: String,
     destination: String,
-    metadata :Object,
+    external_data :Object,
     isActive: {type: Boolean, default : true},
     isExpired: {type: Boolean, default : false},
     transactionHash:  {type :String},
