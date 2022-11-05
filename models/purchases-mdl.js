@@ -1,5 +1,6 @@
-//Require Mongoose
-var mongoose = require('mongoose');
+/**
+ * Created by ethsf on 05/11/22.
+ */var mongoose = require('mongoose');
 
 // Define the purchases Schema
 var purchasesSchema = new mongoose.Schema({

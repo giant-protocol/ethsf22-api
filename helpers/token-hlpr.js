@@ -4,12 +4,6 @@ var _ = require('lodash');
 var axios = require('axios');
 const oauth = require('axios-oauth-client');
 
-const Moralis = require("moralis").default;
-const {EvmChain} = require("@moralisweb3/evm-utils");
-const tokenAddresses = [];
-tokenAddresses.push(process.env.TOKEN_ADDRESS);
-const chain = EvmChain.GOERLI;
-
 /*GiantConnect-Auth Oauth2 configuration*/
 const oauthConfig = {
     url: process.env.ACCESS_TOKEN_URL,
@@ -26,18 +20,15 @@ var TokenHelper = function (ethsf) {
             result.status = false;
             result.admin = process.env.ADMIN_ADDRESS;
             try {
-                const address = args.body.walletAddress;
-                await Moralis.start({
-                    apiKey: process.env.MORALIS_API_KEY,
-                    // ...and any other configuration
-                });
-                const response = await Moralis.EvmApi.nft.getWalletNFTs({
-                    address,
-                    tokenAddresses,
-                    chain,
-                });
+                const balances = await axios.get(
+                    'https://api.covalenthq.com/v1/'+process.env.CHAIN_ID+'/address/'+args.body.walletAddress+'/balances_v2/?quote-currency=USD&format=JSON&nft=true&no-nft-fetch=false&key='+ process.env.COVALENT_API,
+                    {
+                        headers: {},
+                    }
+                );
+                var erc1155Balances =_.filter(balances.data.data.items, {contract_address: process.env.TOKEN_ADDRESS});
                 result.status = true;
-                result.inActivePlans = response;
+                result.inActivePlans = erc1155Balances.length >0  ? erc1155Balances[0].nft_data : [];
                 result.activePlans = await ethsf.models.api.purchase.find({walletAddress: args.body.walletAddress.toLowerCase()});
                 callback(null, result);
             } catch (e) {
@@ -48,23 +39,23 @@ var TokenHelper = function (ethsf) {
 
         /*Function that helps to retrieve nft tokens metadata*/
         fetchMetadata: async function (args, callback) {
-            try{
+            try {
                 var purchase = await ethsf.models.api.purchase.findOne({transactionHash: args.transactionHash});
-                if(purchase !== undefined && purchase !== null){
+                if (purchase !== undefined && purchase !== null) {
                     callback(null, false);
-                }else{
+                } else {
                     const result = await axios.get(
-                        'https://api.covalenthq.com/v1/'+process.env.CHAIN_ID+'/tokens/'+process.env.TOKEN_ADDRESS+'/nft_metadata/'+args.tokenId+'/?format=JSON&key='+process.env.COVALENT_API,
+                        'https://api.covalenthq.com/v1/' + process.env.CHAIN_ID + '/tokens/' + process.env.TOKEN_ADDRESS + '/nft_metadata/' + args.tokenId + '/?format=JSON&key=' + process.env.COVALENT_API,
                         {
                             headers: {},
                         }
                     );
                     var metaData = result.data.data.items[0].nft_data[0].external_data;
                     args.metadata = metaData;
-                    args.dataLimit = _.find(metaData.attributes, {trait_type:'quantity_of_data_in_GB'}).value;
-                    args.validity = _.find(metaData.attributes, {trait_type:'validity_in_days'}).value;
-                    args.destination = _.find(metaData.attributes, {trait_type:'destination'}).value;
-                    this.activatePlan(args,callback);
+                    args.dataLimit = _.find(metaData.attributes, {trait_type: 'quantity_of_data_in_GB'}).value;
+                    args.validity = _.find(metaData.attributes, {trait_type: 'validity_in_days'}).value;
+                    args.destination = _.find(metaData.attributes, {trait_type: 'destination'}).value;
+                    this.activatePlan(args, callback);
                 }
             } catch (e) {
                 console.log(e);
@@ -72,7 +63,7 @@ var TokenHelper = function (ethsf) {
             }
         },
         /* Activate plan by purchasing esim QR and store in the purchase collections */
-        activatePlan:  async function (args, callback) {
+        activatePlan: async function (args, callback) {
             try {
                 const getClientCredentials = oauth.client(axios.create(), oauthConfig);
                 const auth = await getClientCredentials();
@@ -90,23 +81,23 @@ var TokenHelper = function (ethsf) {
                 const endDate = new Date()
                 endDate.setDate(endDate.getDate() + Number(args.validity));
                 const endTime = Math.floor(endDate.getTime() / 1000.0);
-                 const purchase = await axios.post(
-                     process.env.GC_BASEURL + "/purchases",
-                     {
-                         customerId:customer.data.customer.id,
-                         destination:args.destination,
-                         dataLimitInGB: args.dataLimit,
-                         startTime: startTime,
-                         endTime: endTime,
-                     },
-                     {
-                         headers: {
-                             Authorization: "Bearer " + auth.access_token,
-                             "Content-Type": "application/json",
-                         },
-                     }
-                 );
-                 let activatePlan = await ethsf.models.api.purchase.create({
+                const purchase = await axios.post(
+                    process.env.GC_BASEURL + "/purchases",
+                    {
+                        customerId: customer.data.customer.id,
+                        destination: args.destination,
+                        dataLimitInGB: args.dataLimit,
+                        startTime: startTime,
+                        endTime: endTime,
+                    },
+                    {
+                        headers: {
+                            Authorization: "Bearer " + auth.access_token,
+                            "Content-Type": "application/json",
+                        },
+                    }
+                );
+                let activatePlan = await ethsf.models.api.purchase.create({
                     customerId: customer.data.customer.id,
                     destination: args.destination,
                     isActive: true,
@@ -118,7 +109,7 @@ var TokenHelper = function (ethsf) {
                     activationCode: purchase.data.profile.activationCode,
                     dataUsageRemainingInBytes: args.dataLimit * process.env.CONVERSION_FACTOR,
                     walletAddress: args.from.toLowerCase(),
-                    metadata : args.metadata
+                    metadata: args.metadata
                 });
                 this.updatePayment(args);
                 callback(null, true);
@@ -132,15 +123,15 @@ var TokenHelper = function (ethsf) {
         updatePayment: async function (args) {
             try {
                 var payment = await ethsf.models.api.payment.findOne({transactionHash: args.transactionHash});
-                if(payment){
+                if (payment) {
                     await ethsf.models.api.payment.updateOne(
                         {transactionHash: args.transactionHash},
-                        {$set: {metadata: {status:2000,statusMsg:"Confirmed",updatedOn:new Date()}}});
-                }else{
+                        {$set: {metadata: {status: 2000, statusMsg: "Confirmed", updatedOn: new Date()}}});
+                } else {
                     let payment = await ethsf.models.api.payment.create({
                         amount: args.amount,
                         transactionHash: args.transactionHash,
-                        metadata: {status:2000,statusMsg:"Confirmed"},
+                        metadata: {status: 2000, statusMsg: "Confirmed"},
                         tokenId: args.tokenId,
                         walletAddress: args.from,
                     });
@@ -155,12 +146,18 @@ var TokenHelper = function (ethsf) {
         validatePurchase: async function (args, callback) {
             var response = {};
             response.status = false;
-            try{
-                var payment = await ethsf.models.api.payment.findOne({transactionHash: args.transactionHash,tokenId:args.tokenId});
-                if(payment){
-                    if(payment.metadata.status == 2000) {
+            try {
+                var payment = await ethsf.models.api.payment.findOne({
+                    transactionHash: args.transactionHash,
+                    tokenId: args.tokenId
+                });
+                if (payment) {
+                    if (payment.metadata.status == 2000) {
                         response.status = true;
-                        response.purchasedEsim = await ethsf.models.api.purchase.findOne({transactionHash: args.transactionHash,tokenId:args.tokenId})
+                        response.purchasedEsim = await ethsf.models.api.purchase.findOne({
+                            transactionHash: args.transactionHash,
+                            tokenId: args.tokenId
+                        })
                     }
                     callback(null, response);
                 } else {
@@ -168,7 +165,7 @@ var TokenHelper = function (ethsf) {
                     let payment = await ethsf.models.api.payment.create({
                         amount: args.amount,
                         transactionHash: args.transactionHash,
-                        metadata: {status:3000, statusMsg:"Pending Transfer"},
+                        metadata: {status: 3000, statusMsg: "Pending Transfer"},
                         tokenId: args.tokenId,
                         walletAddress: args.from,
                     });
@@ -182,11 +179,11 @@ var TokenHelper = function (ethsf) {
         },
         /* Fetch esim status*/
         verifyInstallation: async function (args, callback) {
-            var response ={};
+            var response = {};
             response.status = false;
-            try{
+            try {
                 var purchase = await ethsf.models.api.purchase.findOne({iccid: args.iccid});
-                if(purchase){
+                if (purchase) {
                     //get Oauth2 access token
                     const getClientCredentials = oauth.client(axios.create(), oauthConfig);
                     const auth = await getClientCredentials();
@@ -213,9 +210,14 @@ var TokenHelper = function (ethsf) {
                     );
                     await ethsf.models.api.purchase.updateOne(
                         {iccid: args.iccid},
-                        { $set: {eSimStatus:eSimStatus.data.esim.status,dataUsageRemainingInBytes:result.data.dataUsageRemainingInBytes} });
+                        {
+                            $set: {
+                                eSimStatus: eSimStatus.data.esim.status,
+                                dataUsageRemainingInBytes: result.data.dataUsageRemainingInBytes
+                            }
+                        });
                     callback(null, response);
-                }else{
+                } else {
                     callback(null, response);
                 }
             } catch (e) {

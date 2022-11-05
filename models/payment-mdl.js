@@ -1,9 +1,9 @@
 /**
- * Created by GP on 22/06/22.
+ * Created by ethsf on 05/11/22.
  */
 var mongoose = require('mongoose');
 var SchemaTypes = mongoose.Schema.Types;
-
+// Define the payment Schema
 var PaymentsSchema = new mongoose.Schema({
     amount:  {type :Number,default :0},
     tokenId:  {type :String},

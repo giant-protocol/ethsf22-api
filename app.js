@@ -1,3 +1,4 @@
+
 var express = require('express');
 
 var cors = require('cors');
@@ -14,7 +15,7 @@ app.use(bodyParser.urlencoded({extended: false}));
 app.use(cookieParser());
 
 
-// Global giant-connect object.
+// Global ethsf object.
 var ethsf = {};
 ethsf.logger = require('./helpers/logger');
 
