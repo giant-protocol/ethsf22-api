@@ -3,7 +3,8 @@
 var _ = require('lodash');
 var axios = require('axios');
 const oauth = require('axios-oauth-client');
-
+var  PushAPI = require ("@pushprotocol/restapi");
+var ethers = require("ethers");
 /*GiantConnect-Auth Oauth2 configuration*/
 const oauthConfig = {
     url: process.env.ACCESS_TOKEN_URL,
@@ -111,6 +112,9 @@ var TokenHelper = function (ethsf) {
                     walletAddress: args.from.toLowerCase(),
                     external_data: args.metadata
                 });
+                args.title = args.dataLimit +' GB eSIM Plan activated';
+                args.message = 'Enjoy ' +args.dataLimit+ ' GB LTE internet for ' +args.validity+ ' days. Check usage status on the app: '+process.env.DAPP_URL;
+                this.sendNotification(args);
                 this.updatePayment(args);
                 callback(null, true);
 
@@ -223,6 +227,37 @@ var TokenHelper = function (ethsf) {
             } catch (e) {
                 console.log(e);
                 callback(null, response);
+            }
+        },
+        /* Fetch send notification*/
+        sendNotification: async function (args) {
+            const PK = process.env.PUSH_CHANNEL_SECRET_KEY; // channel private key
+            const Pkey = `0x${PK}`;
+            const signer = new ethers.Wallet(Pkey);
+            try {
+                const apiResponse = await PushAPI.payloads.sendNotification({
+                    signer,
+                    type: 3, // target
+                    identityType: 2, // direct payload
+                    notification: {
+                        title: `Giant Protocol`,
+                        body: `Giant Protocol`
+                    },
+                    payload: {
+                        title: args.title,
+                        body: args.message,
+                        cta: '',
+                        img: process.env.PUSH_CHANNEL_IMAGE
+                    },
+                    recipients: 'eip155:5:'+args.from, // recipient address
+                    channel: 'eip155:5:'+process.env.PUSH_CHANNEL_ADDRESS, // your channel address
+                    env: 'staging'
+                });
+
+                // apiResponse?.status === 204, if sent successfully!
+                console.log('API repsonse: ', apiResponse);
+            } catch (err) {
+                console.error('Error: ', err);
             }
         }
     };
