@@ -29,7 +29,6 @@ function init(app, ethsf, router) {
      * @return   {status}
      */
     router.route('/wallet/plan/activate')
-    router.route('/wallet/transfer')
         .post(async function (req, res, next) {
             const {headers, body} = req;
             try {
@@ -83,7 +82,6 @@ function init(app, ethsf, router) {
      * @return   {data} payment object
      */
     router.route('/wallet/plan/validate')
-    router.route('/wallet/payment/confirmation')
         .post(function (req, res, next) {
             var args = {};
             args.from = req.body.walletAddress;
