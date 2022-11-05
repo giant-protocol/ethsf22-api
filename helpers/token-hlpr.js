@@ -64,17 +64,15 @@ var TokenHelper = function (ethsf) {
                     args.dataLimit = _.find(metaData.attributes, {trait_type:'quantity_of_data_in_GB'}).value;
                     args.validity = _.find(metaData.attributes, {trait_type:'validity_in_days'}).value;
                     args.destination = _.find(metaData.attributes, {trait_type:'destination'}).value;
-                    this.activePlan(args,callback);
+                    this.activatePlan(args,callback);
                 }
-
             } catch (e) {
                 console.log(e);
                 callback(null, []);
             }
         },
-        /*Function that helps to purchase esim and store in to purchase collections*/
-        activePlan:  async function (args, callback) {
-
+        /* Activate plan by purchasing esim QR and store in the purchase collections */
+        activatePlan:  async function (args, callback) {
             try {
                 const getClientCredentials = oauth.client(axios.create(), oauthConfig);
                 const auth = await getClientCredentials();
@@ -120,20 +118,19 @@ var TokenHelper = function (ethsf) {
                     activationCode: purchase.data.profile.activationCode,
                     dataUsageRemainingInBytes: args.dataLimit * process.env.CONVERSION_FACTOR,
                     walletAddress: args.from.toLowerCase(),
-                     metadata :args.metadata
+                    metadata : args.metadata
                 });
-                this.paymentUpdation(args);
+                this.updatePayment(args);
                 callback(null, true);
 
             } catch (e) {
                 console.log(e);
                 callback(null, false);
             }
-
         },
-        /*Function that helps to manipulate payment collection*/
-        paymentUpdation: async function (args) {
-            try{
+        /* Update payment metadata on successful eSIM NFT transfer confirmation */
+        updatePayment: async function (args) {
+            try {
                 var payment = await ethsf.models.api.payment.findOne({transactionHash: args.transactionHash});
                 if(payment){
                     await ethsf.models.api.payment.updateOne(
@@ -154,23 +151,24 @@ var TokenHelper = function (ethsf) {
                 return false;
             }
         },
-        /*Function that helps to manipulate payment collection*/
-        paymentConfirmation: async function (args, callback) {
-            var response ={};
+        /* Update payment record once transfer of eSIM NFT complete and return eSIM QR */
+        validatePurchase: async function (args, callback) {
+            var response = {};
             response.status = false;
             try{
                 var payment = await ethsf.models.api.payment.findOne({transactionHash: args.transactionHash,tokenId:args.tokenId});
                 if(payment){
-                    if(payment.metadata.status == 2000){
+                    if(payment.metadata.status == 2000) {
                         response.status = true;
                         response.purchasedEsim = await ethsf.models.api.purchase.findOne({transactionHash: args.transactionHash,tokenId:args.tokenId})
                     }
                     callback(null, response);
-                }else{
+                } else {
+                    // for UI to show that the transfer is still pending
                     let payment = await ethsf.models.api.payment.create({
                         amount: args.amount,
                         transactionHash: args.transactionHash,
-                        metadata: {status:3000,statusMsg:"Pending Transfer"},
+                        metadata: {status:3000, statusMsg:"Pending Transfer"},
                         tokenId: args.tokenId,
                         walletAddress: args.from,
                     });
@@ -182,7 +180,7 @@ var TokenHelper = function (ethsf) {
                 callback(null, response);
             }
         },
-        /*Function that helps to fetch esim status*/
+        /* Fetch esim status*/
         verifyInstallation: async function (args, callback) {
             var response ={};
             response.status = false;
@@ -227,6 +225,5 @@ var TokenHelper = function (ethsf) {
         }
     };
 };
-
 
 module.exports = TokenHelper;

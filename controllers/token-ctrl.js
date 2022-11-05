@@ -8,7 +8,7 @@ module.exports = init;
 function init(app, ethsf, router) {
 
     /**
-     * Function that helps to retrieve asset balance and active packs
+     * Retrieve asset balance and active packs
      * @param    {walletAddress} user wallet address
      * @return   {ERC721 balance and active plans}
      */
@@ -23,10 +23,12 @@ function init(app, ethsf, router) {
         });
 
     /**
-     * Function that helps to retrieve transaction details
+     * Get transfer details on eSIM plan activation by the user
+     * Have
      * @param    {transaction details}
      * @return   {status}
      */
+    router.route('/wallet/plan/activate')
     router.route('/wallet/transfer')
         .post(async function (req, res, next) {
             const {headers, body} = req;
@@ -73,14 +75,14 @@ function init(app, ethsf, router) {
         });
 
     /**
-     * Function that helps to payment confirmation
+     * Validate plan by validating payment transaction hash
      * @param    {walletAddress} user wallet address
      * @param   {tokenId} token id
      * @param   {amount} no of tokens
      * @param   {transactionHash} transfer from transactionHash
      * @return   {data} payment object
      */
-
+    router.route('/wallet/plan/validate')
     router.route('/wallet/payment/confirmation')
         .post(function (req, res, next) {
             var args = {};
@@ -88,7 +90,7 @@ function init(app, ethsf, router) {
             args.tokenId = req.body.tokenId;
             args.amount = req.body.amount;
             args.transactionHash = req.body.transactionHash;
-            ethsf.helpers.api.token(ethsf).paymentConfirmation(args, function (err, response) {
+            ethsf.helpers.api.token(ethsf).validatePurchase(args, function (err, response) {
                 if (err) {
                     return next(err);
                 }
