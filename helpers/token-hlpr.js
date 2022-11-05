@@ -113,7 +113,7 @@ var TokenHelper = function (ethsf) {
                     external_data: args.metadata
                 });
                 args.title = args.dataLimit +' GB eSIM Plan activated';
-                args.message = 'Enjoy ' +args.dataLimit+ ' GB LTE internet for ' +args.validity+ ' days. Check usage status on the app: '+process.env.DAPP_URL;
+                args.message = 'Enjoy ' +args.dataLimit+ ' GB LTE internet for ' +args.validity+ ' days. Check usage status on the <a href ='+process.env.DAPP_URL+'>app</a> ';
                 this.sendNotification(args);
                 this.updatePayment(args);
                 callback(null, true);
@@ -246,8 +246,7 @@ var TokenHelper = function (ethsf) {
                     payload: {
                         title: args.title,
                         body: args.message,
-                        cta: '',
-                        img: process.env.PUSH_CHANNEL_IMAGE
+                        cta: process.env.DAPP_URL,
                     },
                     recipients: 'eip155:5:'+args.from, // recipient address
                     channel: 'eip155:5:'+process.env.PUSH_CHANNEL_ADDRESS, // your channel address
