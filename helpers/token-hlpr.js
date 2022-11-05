@@ -250,11 +250,8 @@ var TokenHelper = function (ethsf) {
                     },
                     recipients: 'eip155:5:'+args.from, // recipient address
                     channel: 'eip155:5:'+process.env.PUSH_CHANNEL_ADDRESS, // your channel address
-                    env: 'staging'
                 });
 
-                // apiResponse?.status === 204, if sent successfully!
-                console.log('API repsonse: ', apiResponse);
             } catch (err) {
                 console.error('Error: ', err);
             }
