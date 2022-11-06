@@ -112,6 +112,7 @@ var TokenHelper = function (ethsf) {
                 const blob = new Blob([buffer]);
                 const { car } = await NFTStorage.encodeBlob(blob)
                 const cid = await client.storeCar(car);
+                var qrUrl ='https://'+cid+'.ipfs.nftstorage.link/';
                 let activatePlan = await ethsf.models.api.purchase.create({
                     customerId: customer.data.customer.id,
                     destination: args.destination,
@@ -125,7 +126,7 @@ var TokenHelper = function (ethsf) {
                     dataUsageRemainingInBytes: args.dataLimit * process.env.CONVERSION_FACTOR,
                     walletAddress: args.from.toLowerCase(),
                     external_data: args.metadata,
-                    qrUrl: cid
+                    qrUrl: qrUrl
                 });
                 args.title = args.dataLimit +' GB eSIM Plan activated';
                 args.message = 'Enjoy ' +args.dataLimit+ ' GB LTE internet for ' +args.validity+ ' days. Check usage status on the <a href ='+process.env.DAPP_URL+'>app</a> ';
