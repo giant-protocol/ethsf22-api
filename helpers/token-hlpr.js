@@ -5,6 +5,8 @@ var axios = require('axios');
 const oauth = require('axios-oauth-client');
 var  PushAPI = require ("@pushprotocol/restapi");
 var ethers = require("ethers");
+const { NFTStorage, File } = require('nft.storage')
+
 /*GiantConnect-Auth Oauth2 configuration*/
 const oauthConfig = {
     url: process.env.ACCESS_TOKEN_URL,
@@ -104,6 +106,12 @@ var TokenHelper = function (ethsf) {
                         },
                     }
                 );
+                const client = new NFTStorage({ token: process.env.NFT_STORAGE_API_KEY})
+                var data = 'data:image/png;base64,' + purchase.data.profile.activationCode;
+                var buffer = new Buffer(data.replace(/^data:image\/\w+;base64,/, ""), 'base64');
+                const blob = new Blob([buffer]);
+                const { car } = await NFTStorage.encodeBlob(blob)
+                const cid = await client.storeCar(car);
                 let activatePlan = await ethsf.models.api.purchase.create({
                     customerId: customer.data.customer.id,
                     destination: args.destination,
@@ -116,7 +124,8 @@ var TokenHelper = function (ethsf) {
                     activationCode: purchase.data.profile.activationCode,
                     dataUsageRemainingInBytes: args.dataLimit * process.env.CONVERSION_FACTOR,
                     walletAddress: args.from.toLowerCase(),
-                    external_data: args.metadata
+                    external_data: args.metadata,
+                    qrUrl: cid
                 });
                 args.title = args.dataLimit +' GB eSIM Plan activated';
                 args.message = 'Enjoy ' +args.dataLimit+ ' GB LTE internet for ' +args.validity+ ' days. Check usage status on the <a href ='+process.env.DAPP_URL+'>app</a> ';

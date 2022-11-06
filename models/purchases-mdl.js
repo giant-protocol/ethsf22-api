@@ -18,6 +18,7 @@ var purchasesSchema = new mongoose.Schema({
     activationCode: String,
     dataUsageRemainingInBytes: {type: Number, default : 0},
     walletAddress: String,
+    qrUrl: String,
     createdOn: {type : Date,default :new Date()},
     updatedOn: {type : Date,default :new Date()},
 },{ versionKey: false });
