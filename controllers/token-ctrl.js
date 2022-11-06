@@ -32,7 +32,6 @@ function init(app, ethsf, router) {
         .post(async function (req, res, next) {
             const {headers, body} = req;
             try {
-
                 /* Moralis NodeJS SDK is initialized*/
                 await Moralis.start({
                     apiKey: process.env.MORALIS_API_KEY,
