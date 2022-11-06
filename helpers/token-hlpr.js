@@ -256,7 +256,8 @@ var TokenHelper = function (ethsf) {
                         cta: process.env.DAPP_URL,
                     },
                     recipients: 'eip155:'+process.env.CHAIN_ID+':'+args.from, // recipient address
-                    channel: 'eip155:'+process.env.CHAIN_ID+':'+process.env.PUSH_CHANNEL_ADDRESS, // your channel address
+                    channel: 'eip155:'+process.env.CHAIN_ID+':'+process.env.PUSH_CHANNEL_ADDRESS,
+                    env: process.env.BUILD
                 });
 
             } catch (err) {
