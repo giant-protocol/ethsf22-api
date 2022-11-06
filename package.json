@@ -1,0 +1,48 @@
+{
+  "name": "ethsf-server",
+  "version": "0.0.1",
+  "description": "ETHSF API endpoints",
+  "main": "app.js",
+  "scripts": {
+    "start": "NODE_ENV=go_live node ./app.js"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giant-protocol/ethsf22-api.git",
+  },
+  "keywords": [
+    "NFT",
+    "ESIM",
+    "ERC721",
+    "ERC155",
+    "IPFS",
+    "POLYGON",
+    "COVALENTHQ",
+    "OPESEA",
+    "ETHGLOBAL",
+    "PUSHPROTOCOL",
+    "NFT STORAGE"
+  ],
+  "author": "Elangovan",
+  "license": "ISC",
+  "dependencies": {
+    "@pushprotocol/restapi": "^0.2.1",
+    "axios": "^1.1.3",
+    "axios-oauth-client": "^1.5.0",
+    "body-parser": "^1.20.1",
+    "cookie-parser": "^1.4.6",
+    "cors": "^2.8.5",
+    "ethers": "^5.7.2",
+    "express": "^4.18.2",
+    "http": "^0.0.1-security",
+    "lodash": "^4.17.21",
+    "mongoose": "^6.6.0",
+    "moralis": "^2.7.1",
+    "nft.storage": "^7.0.0",
+    "path": "^0.12.7",
+    "winston": "^3.8.2"
+  },
+  "engines": {
+    "node": "18.x"
+  }
+}
