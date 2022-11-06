@@ -1,6 +1,6 @@
 'use strict';
 
-// eSim Controller
+// wallet Controller
 const Moralis = require("moralis").default;
 
 module.exports = init;

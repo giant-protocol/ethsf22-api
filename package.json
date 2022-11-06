@@ -1,15 +1,27 @@
 {
   "name": "ethsf-server",
   "version": "0.0.1",
-  "description": "ETHSF",
+  "description": "ETHSF API endpoints",
   "main": "app.js",
   "scripts": {
     "start": "NODE_ENV=go_live node ./app.js"
   },
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/giant-protocol/ethsf22-api.git",
+  },
   "keywords": [
     "NFT",
+    "ESIM",
     "ERC721",
-    "OPESEA"
+    "ERC155",
+    "IPFS",
+    "POLYGON",
+    "COVALENTHQ",
+    "OPESEA",
+    "ETHGLOBAL",
+    "PUSHPROTOCOL",
+    "NFT STORAGE"
   ],
   "author": "Elangovan",
   "license": "ISC",
