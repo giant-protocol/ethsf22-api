@@ -230,7 +230,7 @@ var TokenHelper = function (ethsf) {
                     );
                     var dataLimit = _.find(purchase.external_data.attributes, {trait_type: 'quantity_of_data_in_GB'}).value;
                     var dataUsed = (Number(result.data.dataUsageRemainingInBytes)/Number(dataLimit * process.env.CONVERSION_FACTOR)) * 100;
-                    if(dataUsed >= 50){
+                    if(dataUsed <= 50){
                         args.title = 'GIANT eSIM usage reached 50%';
                         args.message = 'Time to top-up to enjoy uninterrupted internet access.Get it on Check usage status on the <a href ='+process.env.DAPP_URL+'>app</a> ';
                         args.from = purchase.walletAddress;
