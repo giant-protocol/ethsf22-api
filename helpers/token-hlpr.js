@@ -27,8 +27,14 @@ var TokenHelper = function (ethsf) {
                         headers: {},
                     }
                 );
+                const isPushProtocolSubscribed = await PushAPI.user.getSubscriptions({
+                    user: 'eip155:+'+process.env.CHAIN_ID+':'+args.body.walletAddress, //
+                    env: process.env.BUILD
+                });
+                var isPushProtocolEnabled =_.filter(isPushProtocolSubscribed, {channel:process.env.PUSH_CHANNEL_ADDRESS });
                 var erc1155Balances =_.filter(balances.data.data.items, {contract_address: process.env.TOKEN_ADDRESS});
                 result.status = true;
+                result.isPushProtocolEnabled = isPushProtocolEnabled.length > 0 ? true :false;
                 result.inActivePlans = erc1155Balances.length >0  ? erc1155Balances[0].nft_data : [];
                 result.activePlans = await ethsf.models.api.purchase.find({walletAddress: args.body.walletAddress.toLowerCase()});
                 callback(null, result);
@@ -249,8 +255,8 @@ var TokenHelper = function (ethsf) {
                         body: args.message,
                         cta: process.env.DAPP_URL,
                     },
-                    recipients: 'eip155:5:'+args.from, // recipient address
-                    channel: 'eip155:5:'+process.env.PUSH_CHANNEL_ADDRESS, // your channel address
+                    recipients: 'eip155:'+process.env.CHAIN_ID+':'+args.from, // recipient address
+                    channel: 'eip155:'+process.env.CHAIN_ID+':'+process.env.PUSH_CHANNEL_ADDRESS, // your channel address
                 });
 
             } catch (err) {
