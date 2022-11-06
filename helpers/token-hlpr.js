@@ -30,11 +30,11 @@ var TokenHelper = function (ethsf) {
                     }
                 );
                 const isPushProtocolSubscribed = await PushAPI.user.getSubscriptions({
-                    user: 'eip155:+'+process.env.CHAIN_ID+':'+args.body.walletAddress, //
+                    user: 'eip155:+'+process.env.CHAIN_ID+':'+args.body.walletAddress,
                     env: process.env.BUILD
                 });
                 var isPushProtocolEnabled =_.filter(isPushProtocolSubscribed, {channel:process.env.PUSH_CHANNEL_ADDRESS });
-                var erc1155Balances =_.filter(balances.data.data.items, {contract_address: process.env.TOKEN_ADDRESS});
+                var erc1155Balances =_.filter(balances.data.data.items, {contract_address: process.env.NFT_CONTRACT_ADDRESS});
                 result.status = true;
                 result.isPushProtocolEnabled = isPushProtocolEnabled.length > 0 ? true :false;
                 result.inActivePlans = erc1155Balances.length >0  ? erc1155Balances[0].nft_data : [];
@@ -54,7 +54,7 @@ var TokenHelper = function (ethsf) {
                     callback(null, false);
                 } else {
                     const result = await axios.get(
-                        'https://api.covalenthq.com/v1/' + process.env.CHAIN_ID + '/tokens/' + process.env.TOKEN_ADDRESS + '/nft_metadata/' + args.tokenId + '/?format=JSON&key=' + process.env.COVALENT_API,
+                        'https://api.covalenthq.com/v1/' + process.env.CHAIN_ID + '/tokens/' + process.env.NFT_CONTRACT_ADDRESS + '/nft_metadata/' + args.tokenId + '/?format=JSON&key=' + process.env.COVALENT_API,
                         {
                             headers: {},
                         }
